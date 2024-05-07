@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
 
 
   goversion:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     needs: prepare
     container:
       image: ${{ needs.prepare.outputs.build_image }}
@@ -48,7 +48,7 @@ jobs:
       version: ${{ steps.go-version.outputs.version }}
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     needs: prepare
     container:
       image: ${{ needs.prepare.outputs.build_image }}
@@ -105,7 +105,7 @@ jobs:
         run: make BUILD_IN_CONTAINER=false check-mimir-microservices-mode-docker-compose-yaml check-mimir-read-write-mode-docker-compose-yaml
 
   doc-validator:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     container:
       image: grafana/doc-validator:v5.1.0
     steps:
@@ -142,7 +142,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
   lint-jsonnet:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     needs:
       - prepare
     container:
@@ -172,7 +172,7 @@ jobs:
         run: make BUILD_IN_CONTAINER=false check-jsonnet-tests
 
   lint-helm:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     needs:
       - prepare
     container:
@@ -196,7 +196,7 @@ jobs:
         run: make BUILD_IN_CONTAINER=false check-helm-tests
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     strategy:
       # Do not abort other groups when one fails.
       fail-fast: false
@@ -236,7 +236,7 @@ jobs:
     uses: ./.github/workflows/test-docs.yml
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     needs:
       - prepare
     container:
@@ -302,7 +302,7 @@ jobs:
 
   integration:
     needs: [goversion, build, prepare]
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     strategy:
       # Do not abort other groups when one fails.
       fail-fast: false
@@ -374,7 +374,7 @@ jobs:
 
   integration-alpine:
     needs: [goversion, build, prepare]
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     if: needs.prepare.outputs.is_deploy == 'true'
     strategy:
       # Do not abort other groups when one fails.
@@ -449,7 +449,7 @@ jobs:
     needs: [prepare, build, test, lint, integration, integration-alpine]
     # Only deploy images on pushes to the grafana/mimir repo, which either are tag pushes or weekly release branch pushes.
     if: needs.prepare.outputs.is_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: nscloud
     container:
       image: ${{ needs.prepare.outputs.build_image }}
     steps:
